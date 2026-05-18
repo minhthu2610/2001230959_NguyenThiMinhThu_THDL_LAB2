@@ -1,213 +1,235 @@
-# LAB 2 - LINEAR REGRESSION WITH TENSORFLOW
+# 🏠 Deep Learning Buổi 2 — HOMES Dataset
 
-## Thông tin sinh viên
+## 📌 Giới thiệu
 
-* Họ tên: Nguyễn Thị Minh Thư
-* Môn học: Thực hành TensorFlow / PyTorch
-* Nội dung: Linear Regression với TensorFlow
-* Dataset: 23_HOMES.csv
+Bài thực hành xây dựng mô hình Deep Learning dự đoán giá nhà bằng TensorFlow/Keras kết hợp quy trình tiền xử lý dữ liệu chuẩn nhằm tránh **Data Leakage**.
 
----
+Dataset sử dụng:
+- `23_HOMES.csv`
 
-# 1. Mục tiêu bài thực hành
-
-Trong buổi thực hành này tiến hành:
-
-* Đọc dữ liệu từ file CSV
-* Làm sạch dữ liệu
-* Chuẩn hóa dữ liệu bằng Z-score
-* Xây dựng mô hình Linear Regression bằng TensorFlow
-* Huấn luyện mô hình
-* Đánh giá mô hình
-* Vẽ Loss Curve
-* Sử dụng EarlyStopping
-* Lưu scaler và model
+Bài toán:
+- Regression — dự đoán giá nhà dựa trên các thuộc tính của căn nhà.
 
 ---
 
-# 2. Dataset sử dụng
+# 🎯 Mục tiêu bài thực hành
 
-Dataset được lấy từ GitHub:
-
-[https://github.com/huynhhoc/DataAnalystDeepLearning/blob/main/Data/23_HOMES.csv](https://github.com/huynhhoc/DataAnalystDeepLearning/blob/main/Data/23_HOMES.csv)
-
-Dataset chứa các thuộc tính của nhà ở như:
-
-* diện tích
-* số phòng
-* vị trí
-* năm xây dựng
-* giá nhà
-
-Mục tiêu:
-
-* sử dụng các thuộc tính để dự đoán giá nhà.
-
----
-
-# 3. Công nghệ sử dụng
-
-* Python
-* TensorFlow
-* Pandas
-* NumPy
-* Scikit-learn
-* Matplotlib
+- Hiểu và áp dụng đúng quy trình preprocessing trong Machine Learning
+- Tránh lỗi Data Leakage khi scaling dữ liệu
+- Sử dụng:
+  - MinMaxScaler
+  - OneHotEncoder
+  - ColumnTransformer
+- Xây dựng mô hình Neural Network Regression bằng TensorFlow/Keras
+- Sử dụng:
+  - Dropout
+  - EarlyStopping
+- Vẽ biểu đồ Loss Curve
+- Đánh giá mô hình bằng:
+  - MSE
+  - MAE
+  - R² Score
 
 ---
 
-# 4. Flow quy trình thực hiện
+# 📂 Dataset
+
+Dataset:
+- `23_HOMES.csv`
+
+Nguồn dữ liệu:
+
+https://github.com/huynhhoc/DataAnalystDeepLearning/blob/main/Data/23_HOMES.csv
+
+Dataset bao gồm các thuộc tính:
+- diện tích
+- số phòng
+- tuổi nhà
+- thuế
+- số phòng ngủ
+- số phòng tắm
+- giá nhà
+
+---
+
+# 🛠️ Công nghệ sử dụng
+
+- Python
+- TensorFlow / Keras
+- Pandas
+- NumPy
+- Scikit-learn
+- Matplotlib
+
+---
+
+# ⚠️ Golden Rule chống Data Leakage
+
+Quy tắc quan trọng trong preprocessing:
 
 ```text
-Bắt đầu
-   ↓
-Đọc dataset CSV
-   ↓
-Hiển thị và kiểm tra dữ liệu
-   ↓
-Làm sạch dữ liệu
-   ├── Xóa khoảng trắng tên cột
-   ├── Kiểm tra dữ liệu null
-   ├── Xóa dữ liệu null
-   └── Xóa dữ liệu trùng lặp
-   ↓
-Tách Input (X) và Output (y)
-   ↓
-Chia Train/Test
-   ├── 80% Train
-   └── 20% Test
-   ↓
-Chuẩn hóa dữ liệu (Z-score)
-   ├── Fit scaler trên train set
-   └── Transform test set
-   ↓
-Lưu scaler (.pkl)
-   ↓
-Xây dựng mô hình Linear Regression
-   ↓
-Compile model
-   ├── Optimizer: Adam
-   ├── Loss: MSE
-   └── Metric: MAE
-   ↓
-Cài đặt EarlyStopping
-   ↓
-Huấn luyện mô hình (Training)
-   ↓
-Vẽ Loss Curve
-   ↓
-Predict dữ liệu test
-   ↓
-Đánh giá mô hình
-   ├── MSE
-   ├── MAE
-   └── R² Score
-   ↓
-Lưu model (.h5)
-   ↓
-Dự đoán dữ liệu mới
-   ↓
-Kết thúc
+Split FIRST
+→ Fit ONLY on train
+→ Transform train/test
+→ Test ONLY once
+```
+
+Ý nghĩa:
+- Không được fit scaler trên toàn bộ dataset
+- Chỉ fit preprocessing trên train set
+- Test set chỉ dùng để đánh giá cuối cùng
+
+---
+
+# 🔄 Flow quy trình thực hiện
+
+```text
+Raw Data (23_HOMES.csv)
+        │
+        ▼
+1. Khám phá dữ liệu (EDA)
+        │
+        ▼
+2. Split FIRST — train_test_split()
+        │
+        ├──── X_train ──────────────────────────────┐
+        │         │                                  │
+        │         ▼                                  │
+        │   3. Fit Preprocessor                      │
+        │      - MinMaxScaler (numeric)              │
+        │      - OneHotEncoder (categorical)         │
+        │         │                                  │
+        │         ▼                                  ▼
+        │   4. Transform Train          4. Transform Test
+        │         │                                  │
+        └─────────┴──────────────────────────────────┘
+                  │
+                  ▼
+        5. Build Keras Model
+           Input → Dense(32) → Dropout → Dense(16)
+                 → Dropout → Dense(1)
+                  │
+                  ▼
+        6. Train
+           validation_split=0.2
+           EarlyStopping
+                  │
+                  ▼
+        7. Evaluate TEST SET
 ```
 
 ---
 
-# 5. Quy trình thực hiện
+# 🧹 Tiền xử lý dữ liệu
 
-## Bước 1: Đọc dữ liệu
+## 1. Data Cleaning
 
-Sử dụng pandas để đọc file CSV:
-
-```python
-df = pd.read_csv(url)
-```
-
----
-
-## Bước 2: Làm sạch dữ liệu
-
-Các bước thực hiện:
-
-* xóa khoảng trắng tên cột
-* kiểm tra dữ liệu null
-* xóa dữ liệu null
-* xóa dữ liệu trùng lặp
+Thực hiện:
+- xóa khoảng trắng tên cột
+- xóa dữ liệu null
+- xóa dữ liệu trùng lặp
 
 ```python
+df.columns = df.columns.str.strip()
+
 df = df.dropna()
+
 df = df.drop_duplicates()
 ```
 
 ---
 
-## Bước 3: Chia dữ liệu Input và Output
+# 📊 Chia dữ liệu Train/Test
 
 ```python
-X = df.iloc[:, :-1]
-y = df.iloc[:, -1]
+train_test_split(
+    test_size=0.2,
+    random_state=42
+)
 ```
 
-* `X`: dữ liệu đầu vào
-* `y`: giá nhà cần dự đoán
+- 80% train
+- 20% test
 
 ---
 
-## Bước 4: Chia train/test
+# 🔧 Preprocessing Pipeline
+
+## Numeric Features
+
+Sử dụng:
 
 ```python
-train_test_split(test_size=0.2)
+MinMaxScaler()
 ```
 
-* 80% dữ liệu train
-* 20% dữ liệu test
+Công thức:
+
+\[
+x' = \frac{x-x_{min}}{x_{max}-x_{min}}
+\]
 
 ---
 
-## Bước 5: Chuẩn hóa dữ liệu
+## Categorical Features
 
-Sử dụng phương pháp Z-score:
-
-[
-z = \frac{x - \mu}{\sigma}
-]
+Sử dụng:
 
 ```python
-scaler = StandardScaler()
+OneHotEncoder()
 ```
 
-Tiến hành:
+Ví dụ:
 
-* fit_transform() cho train set
-* transform() cho test set
+| House_Type |
+|---|
+| Villa |
+| Apartment |
+
+Sau encoding:
+
+| Villa | Apartment |
+|---|---|
+| 1 | 0 |
+| 0 | 1 |
 
 ---
 
-## Bước 6: Xây dựng mô hình Linear Regression
+# 🏗️ Mô hình Deep Learning
 
-Mô hình được xây dựng bằng TensorFlow:
+Mô hình sử dụng:
 
 ```python
-model = tf.keras.Sequential([
-    tf.keras.layers.Dense(1)
+Sequential([
+    Dense(32, activation='relu'),
+    Dropout(0.2),
+
+    Dense(16, activation='relu'),
+    Dropout(0.2),
+
+    Dense(1)
 ])
 ```
 
-Công thức Linear Regression:
+Kiến trúc:
 
-[
-\hat{y}=w_1x_1+w_2x_2+...+w_nx_n+b
-]
-
-Trong đó:
-
-* (x): input
-* (w): trọng số
-* (b): bias
-* (\hat{y}): giá trị dự đoán
+```text
+Input
+ ↓
+Dense(32)
+ ↓
+Dropout(0.2)
+ ↓
+Dense(16)
+ ↓
+Dropout(0.2)
+ ↓
+Dense(1)
+```
 
 ---
 
-## Bước 7: Compile model
+# 🧠 Compile Model
 
 ```python
 model.compile(
@@ -217,13 +239,23 @@ model.compile(
 )
 ```
 
-* `adam`: thuật toán tối ưu
-* `mse`: hàm mất mát
-* `mae`: metric đánh giá
+## Optimizer
+- Adam
+
+## Loss Function
+
+Mean Squared Error:
+
+\[
+MSE = \frac{1}{n}\sum_{i=1}^{n}(y_i-\hat{y_i})^2
+\]
+
+## Metric
+- MAE
 
 ---
 
-## Bước 8: EarlyStopping
+# ⏹️ EarlyStopping
 
 ```python
 EarlyStopping(
@@ -233,105 +265,106 @@ EarlyStopping(
 )
 ```
 
-Ý nghĩa:
-
-* theo dõi validation loss
-* dừng train khi model không còn cải thiện
-* tránh overfitting
+Mục đích:
+- tránh overfitting
+- dừng train khi validation loss không cải thiện
 
 ---
 
-## Bước 9: Huấn luyện mô hình
+# 📈 Loss Curve
 
-```python
-model.fit(...)
-```
-
-Thông số:
-
-* epochs = 100
-* batch_size = 8
-
----
-
-## Bước 10: Đánh giá mô hình
-
-Các metric sử dụng:
-
-* MSE
-* MAE
-* R² Score
-
-```python
-mean_squared_error()
-mean_absolute_error()
-r2_score()
-```
-
----
-
-# 6. Loss Curve
-
-Biểu đồ Loss Curve dùng để theo dõi quá trình học của mô hình.
-
-* Train Loss giảm:
-  mô hình học tốt.
-
-* Validation Loss tăng:
-  dấu hiệu overfitting.
+Biểu đồ Loss Curve giúp theo dõi:
+- quá trình học của model
+- khả năng tổng quát hóa
+- dấu hiệu overfitting
 
 ## Code vẽ Loss Curve
 
 ```python
-plt.figure(figsize=(10,5))
-
-plt.plot(history.history['loss'], label='Train Loss')
-plt.plot(history.history['val_loss'], label='Validation Loss')
-
-plt.title('Loss Curve')
-plt.xlabel('Epoch')
-plt.ylabel('Loss')
-plt.legend()
-
-plt.show()
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
 ```
 
-## Kết quả Loss Curve
+## Kết quả
 
-```text
-Thêm ảnh loss_curve.png vào thư mục images
-Sau đó GitHub sẽ hiển thị hình ảnh tại đây.
+![Loss Curve](images/loss_curve.png)
+
+---
+
+# 📊 Đánh giá mô hình
+
+Các metric sử dụng:
+
+## MSE
+- Mean Squared Error
+
+## MAE
+- Mean Absolute Error
+
+## R² Score
+- đánh giá độ phù hợp của mô hình
+
+---
+
+# 💾 Lưu Model & Preprocessor
+
+## Save Model
+
+```python
+model.save("homes_regression_model.h5")
+```
+
+## Save Preprocessor
+
+```python
+joblib.dump(
+    preprocessor,
+    "homes_preprocessor.pkl"
+)
 ```
 
 ---
 
-# 7. Kết quả đạt được
+# ✅ Kết quả đạt được
 
-* Đọc và xử lý thành công dataset
-* Chuẩn hóa dữ liệu bằng Z-score
-* Xây dựng mô hình Linear Regression bằng TensorFlow
-* Huấn luyện mô hình dự đoán giá nhà
-* Vẽ được biểu đồ Loss Curve
-* Sử dụng EarlyStopping để giảm overfitting
-* Lưu scaler và model thành công
+- Xây dựng thành công pipeline preprocessing chống Data Leakage
+- Chuẩn hóa dữ liệu đúng quy trình
+- Xây dựng mô hình Deep Learning Regression
+- Huấn luyện mô hình bằng TensorFlow/Keras
+- Sử dụng EarlyStopping chống overfitting
+- Vẽ được Loss Curve
+- Đánh giá mô hình bằng MSE, MAE và R² Score
+- Lưu model và preprocessor thành công
 
 ---
 
-# 8. Kết luận
+# 📚 Kiến thức học được
 
-Qua bài thực hành đã hiểu được quy trình cơ bản của Machine Learning:
+- Quy trình preprocessing chuẩn trong Machine Learning
+- Cách chống Data Leakage
+- MinMax Scaling
+- OneHot Encoding
+- ColumnTransformer Pipeline
+- Neural Network Regression
+- Dropout
+- EarlyStopping
+- Loss Curve Analysis
 
-* Tiền xử lý dữ liệu
-* Chuẩn hóa dữ liệu
-* Xây dựng mô hình
-* Huấn luyện mô hình
-* Đánh giá mô hình
+---
 
-Ngoài ra cũng hiểu được vai trò của:
+# 📖 Tài liệu tham khảo
 
-* StandardScaler
-* Loss Function
-* EarlyStopping
-* Loss Curve
+## TensorFlow
+https://www.tensorflow.org/
 
-TensorFlow hỗ trợ xây dựng và huấn luyện mô hình hiệu quả, kết hợp với pandas và scikit-learn giúp xử lý dữ liệu thuận tiện hơn.
+## Scikit-learn
+https://scikit-learn.org/
+
+## Dataset
+https://github.com/huynhhoc/DataAnalystDeepLearning
+
+---
+
+# 👨‍💻 Sinh viên thực hiện
+
+Nguyễn Thị Minh Thư
