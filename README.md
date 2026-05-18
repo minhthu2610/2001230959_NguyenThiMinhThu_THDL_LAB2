@@ -2,10 +2,10 @@
 
 ## Thông tin sinh viên
 
-- Họ tên: Nguyễn Thị Minh Thư
-- Môn học: Thực hành TensorFlow / PyTorch
-- Nội dung: Linear Regression với TensorFlow
-- Dataset: 23_HOMES.csv
+* Họ tên: Nguyễn Thị Minh Thư
+* Môn học: Thực hành TensorFlow / PyTorch
+* Nội dung: Linear Regression với TensorFlow
+* Dataset: 23_HOMES.csv
 
 ---
 
@@ -13,15 +13,15 @@
 
 Trong buổi thực hành này tiến hành:
 
-- Đọc dữ liệu từ file CSV
-- Làm sạch dữ liệu
-- Chuẩn hóa dữ liệu bằng Z-score
-- Xây dựng mô hình Linear Regression bằng TensorFlow
-- Huấn luyện mô hình
-- Đánh giá mô hình
-- Vẽ Loss Curve
-- Sử dụng EarlyStopping
-- Lưu scaler và model
+* Đọc dữ liệu từ file CSV
+* Làm sạch dữ liệu
+* Chuẩn hóa dữ liệu bằng Z-score
+* Xây dựng mô hình Linear Regression bằng TensorFlow
+* Huấn luyện mô hình
+* Đánh giá mô hình
+* Vẽ Loss Curve
+* Sử dụng EarlyStopping
+* Lưu scaler và model
 
 ---
 
@@ -29,32 +29,90 @@ Trong buổi thực hành này tiến hành:
 
 Dataset được lấy từ GitHub:
 
-https://github.com/huynhhoc/DataAnalystDeepLearning/blob/main/Data/23_HOMES.csv
+[https://github.com/huynhhoc/DataAnalystDeepLearning/blob/main/Data/23_HOMES.csv](https://github.com/huynhhoc/DataAnalystDeepLearning/blob/main/Data/23_HOMES.csv)
 
 Dataset chứa các thuộc tính của nhà ở như:
-- diện tích
-- số phòng
-- vị trí
-- năm xây dựng
-- giá nhà
+
+* diện tích
+* số phòng
+* vị trí
+* năm xây dựng
+* giá nhà
 
 Mục tiêu:
-- sử dụng các thuộc tính để dự đoán giá nhà.
+
+* sử dụng các thuộc tính để dự đoán giá nhà.
 
 ---
 
 # 3. Công nghệ sử dụng
 
-- Python
-- TensorFlow
-- Pandas
-- NumPy
-- Scikit-learn
-- Matplotlib
+* Python
+* TensorFlow
+* Pandas
+* NumPy
+* Scikit-learn
+* Matplotlib
 
 ---
 
-# 4. Quy trình thực hiện
+# 4. Flow quy trình thực hiện
+
+```text
+Bắt đầu
+   ↓
+Đọc dataset CSV
+   ↓
+Hiển thị và kiểm tra dữ liệu
+   ↓
+Làm sạch dữ liệu
+   ├── Xóa khoảng trắng tên cột
+   ├── Kiểm tra dữ liệu null
+   ├── Xóa dữ liệu null
+   └── Xóa dữ liệu trùng lặp
+   ↓
+Tách Input (X) và Output (y)
+   ↓
+Chia Train/Test
+   ├── 80% Train
+   └── 20% Test
+   ↓
+Chuẩn hóa dữ liệu (Z-score)
+   ├── Fit scaler trên train set
+   └── Transform test set
+   ↓
+Lưu scaler (.pkl)
+   ↓
+Xây dựng mô hình Linear Regression
+   ↓
+Compile model
+   ├── Optimizer: Adam
+   ├── Loss: MSE
+   └── Metric: MAE
+   ↓
+Cài đặt EarlyStopping
+   ↓
+Huấn luyện mô hình (Training)
+   ↓
+Vẽ Loss Curve
+   ↓
+Predict dữ liệu test
+   ↓
+Đánh giá mô hình
+   ├── MSE
+   ├── MAE
+   └── R² Score
+   ↓
+Lưu model (.h5)
+   ↓
+Dự đoán dữ liệu mới
+   ↓
+Kết thúc
+```
+
+---
+
+# 5. Quy trình thực hiện
 
 ## Bước 1: Đọc dữ liệu
 
@@ -69,10 +127,11 @@ df = pd.read_csv(url)
 ## Bước 2: Làm sạch dữ liệu
 
 Các bước thực hiện:
-- xóa khoảng trắng tên cột
-- kiểm tra dữ liệu null
-- xóa dữ liệu null
-- xóa dữ liệu trùng lặp
+
+* xóa khoảng trắng tên cột
+* kiểm tra dữ liệu null
+* xóa dữ liệu null
+* xóa dữ liệu trùng lặp
 
 ```python
 df = df.dropna()
@@ -88,8 +147,8 @@ X = df.iloc[:, :-1]
 y = df.iloc[:, -1]
 ```
 
-- `X`: dữ liệu đầu vào
-- `y`: giá nhà cần dự đoán
+* `X`: dữ liệu đầu vào
+* `y`: giá nhà cần dự đoán
 
 ---
 
@@ -99,8 +158,8 @@ y = df.iloc[:, -1]
 train_test_split(test_size=0.2)
 ```
 
-- 80% dữ liệu train
-- 20% dữ liệu test
+* 80% dữ liệu train
+* 20% dữ liệu test
 
 ---
 
@@ -108,17 +167,18 @@ train_test_split(test_size=0.2)
 
 Sử dụng phương pháp Z-score:
 
-\[
+[
 z = \frac{x - \mu}{\sigma}
-\]
+]
 
 ```python
 scaler = StandardScaler()
 ```
 
 Tiến hành:
-- fit_transform() cho train set
-- transform() cho test set
+
+* fit_transform() cho train set
+* transform() cho test set
 
 ---
 
@@ -134,15 +194,16 @@ model = tf.keras.Sequential([
 
 Công thức Linear Regression:
 
-\[
+[
 \hat{y}=w_1x_1+w_2x_2+...+w_nx_n+b
-\]
+]
 
 Trong đó:
-- \(x\): input
-- \(w\): trọng số
-- \(b\): bias
-- \(\hat{y}\): giá trị dự đoán
+
+* (x): input
+* (w): trọng số
+* (b): bias
+* (\hat{y}): giá trị dự đoán
 
 ---
 
@@ -156,9 +217,9 @@ model.compile(
 )
 ```
 
-- `adam`: thuật toán tối ưu
-- `mse`: hàm mất mát
-- `mae`: metric đánh giá
+* `adam`: thuật toán tối ưu
+* `mse`: hàm mất mát
+* `mae`: metric đánh giá
 
 ---
 
@@ -173,9 +234,10 @@ EarlyStopping(
 ```
 
 Ý nghĩa:
-- theo dõi validation loss
-- dừng train khi model không còn cải thiện
-- tránh overfitting
+
+* theo dõi validation loss
+* dừng train khi model không còn cải thiện
+* tránh overfitting
 
 ---
 
@@ -186,17 +248,19 @@ model.fit(...)
 ```
 
 Thông số:
-- epochs = 100
-- batch_size = 8
+
+* epochs = 100
+* batch_size = 8
 
 ---
 
 ## Bước 10: Đánh giá mô hình
 
 Các metric sử dụng:
-- MSE
-- MAE
-- R² Score
+
+* MSE
+* MAE
+* R² Score
 
 ```python
 mean_squared_error()
@@ -206,14 +270,14 @@ r2_score()
 
 ---
 
-# 5. Loss Curve
+# 6. Loss Curve
 
 Biểu đồ Loss Curve dùng để theo dõi quá trình học của mô hình.
 
-- Train Loss giảm:
+* Train Loss giảm:
   mô hình học tốt.
 
-- Validation Loss tăng:
+* Validation Loss tăng:
   dấu hiệu overfitting.
 
 ## Code vẽ Loss Curve
@@ -234,49 +298,40 @@ plt.show()
 
 ## Kết quả Loss Curve
 
-![Loss Curve](images/loss_curve.png)
+```text
+Thêm ảnh loss_curve.png vào thư mục images
+Sau đó GitHub sẽ hiển thị hình ảnh tại đây.
+```
 
 ---
 
-# 6. Kết quả đạt được
+# 7. Kết quả đạt được
 
-- Đọc và xử lý thành công dataset
-- Chuẩn hóa dữ liệu bằng Z-score
-- Xây dựng mô hình Linear Regression bằng TensorFlow
-- Huấn luyện mô hình dự đoán giá nhà
-- Vẽ được biểu đồ Loss Curve
-- Sử dụng EarlyStopping để giảm overfitting
-- Lưu scaler và model thành công
+* Đọc và xử lý thành công dataset
+* Chuẩn hóa dữ liệu bằng Z-score
+* Xây dựng mô hình Linear Regression bằng TensorFlow
+* Huấn luyện mô hình dự đoán giá nhà
+* Vẽ được biểu đồ Loss Curve
+* Sử dụng EarlyStopping để giảm overfitting
+* Lưu scaler và model thành công
 
 ---
 
-# 7. Kết luận
+# 8. Kết luận
 
 Qua bài thực hành đã hiểu được quy trình cơ bản của Machine Learning:
 
-- Tiền xử lý dữ liệu
-- Chuẩn hóa dữ liệu
-- Xây dựng mô hình
-- Huấn luyện mô hình
-- Đánh giá mô hình
+* Tiền xử lý dữ liệu
+* Chuẩn hóa dữ liệu
+* Xây dựng mô hình
+* Huấn luyện mô hình
+* Đánh giá mô hình
 
 Ngoài ra cũng hiểu được vai trò của:
-- StandardScaler
-- Loss Function
-- EarlyStopping
-- Loss Curve
+
+* StandardScaler
+* Loss Function
+* EarlyStopping
+* Loss Curve
 
 TensorFlow hỗ trợ xây dựng và huấn luyện mô hình hiệu quả, kết hợp với pandas và scikit-learn giúp xử lý dữ liệu thuận tiện hơn.
-
----
-
-# 8. Tài liệu tham khảo
-
-- TensorFlow Documentation:
-  https://www.tensorflow.org/
-
-- Scikit-learn Documentation:
-  https://scikit-learn.org/
-
-- Dataset:
-  https://github.com/huynhhoc/DataAnalystDeepLearning
